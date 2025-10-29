@@ -27,6 +27,11 @@ export const CONFIG = {
     whatsappEnabled: false, // Set to true when you configure WhatsApp API
     gpsTrackingEnabled: true,
     ratingsEnabled: true
+  },
+  // Lightweight access control (client-side; change and redeploy)
+  access: {
+    adminCode: 'admin-2025',
+    riderCode: 'rider-2025'
   }
 };
 

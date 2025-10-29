@@ -40,7 +40,7 @@
 </head>
 <body class="bg-gray-50">
     
-    <nav class="fixed w-full bg-white/95 backdrop-blur-sm shadow-sm z-50">
+    <nav class="fixed top-0 left-0 right-0 w-full bg-white/95 backdrop-blur-sm shadow-sm z-50">
         <div class="container mx-auto px-6 py-4">
             <div class="flex justify-between items-center">
                 <a href="index.html" class="flex items-center space-x-2 group cursor-pointer">
@@ -183,14 +183,26 @@
         let orderSubscription = null;
         let pollInterval = null;
 
-        // Get order ID from URL or input
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderIdFromUrl = urlParams.get('order');
-        
-        if (orderIdFromUrl) {
-            document.getElementById('orderIdInput').value = orderIdFromUrl;
-            trackOrder();
-        }
+        // Load from URL on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderIdFromUrl = urlParams.get('order');
+            if (orderIdFromUrl) {
+                const normalized = decodeURIComponent(orderIdFromUrl).trim().toUpperCase();
+                const input = document.getElementById('orderIdInput');
+                input.value = normalized;
+                trackOrder();
+            }
+
+            // Enter key submits
+            const input = document.getElementById('orderIdInput');
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    trackOrder();
+                }
+            });
+        });
 
         // Mobile menu toggle
         const btnTrack = document.getElementById('mobileMenuBtnTrack');
@@ -200,7 +212,10 @@
         }
 
         window.trackOrder = async function() {
-            const orderId = document.getElementById('orderIdInput').value.trim();
+            const orderId = document.getElementById('orderIdInput').value.trim().toUpperCase();
+            if (orderId) {
+                history.pushState({}, '', `?order=${orderId}`);
+            }
             
             if (!orderId) {
                 showToast('Please enter an order ID', 'error');
@@ -369,15 +384,7 @@
             }, 5000);
         }
 
-        // Update URL when searching
-        const originalTrackOrder = window.trackOrder;
-        window.trackOrder = function() {
-            const orderId = document.getElementById('orderIdInput').value.trim();
-            if (orderId) {
-                history.pushState({}, '', `?order=${orderId}`);
-            }
-            originalTrackOrder();
-        };
+        // (Removed wrapper; URL updates inside trackOrder)
 
         // Cleanup on page unload
         window.addEventListener('beforeunload', () => {

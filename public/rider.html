@@ -112,6 +112,22 @@
     <script type="module">
         import { CONFIG, getSupabaseClient, showToast, getWhatsAppLink } from './js/config.js';
 
+        // Lightweight access gate
+        const urlKey = new URLSearchParams(window.location.search).get('key');
+        const storedKey = localStorage.getItem('erdelivery_rider_key');
+        if (urlKey && urlKey === CONFIG.access.riderCode) {
+            localStorage.setItem('erdelivery_rider_key', urlKey);
+        }
+        if (!localStorage.getItem('erdelivery_rider_key')) {
+            const input = prompt('Enter rider access code');
+            if (input !== CONFIG.access.riderCode) {
+                alert('Access denied');
+                window.location.href = 'index.html';
+            } else {
+                localStorage.setItem('erdelivery_rider_key', input);
+            }
+        }
+
         const supabase = getSupabaseClient();
         let currentOrder = null;
         let currentPosition = null;
@@ -421,6 +437,13 @@
                 
                 // Reload order
                 setTimeout(() => loadOrder(), 1000);
+
+                // If delivered, also send a prefilled message to admin for forwarding
+                if (newStatus === 'delivered') {
+                    const message = `✅ Delivered\n\nHi ${currentOrder.client_name},\nYour order ${currentOrder.order_id} has been delivered.\nThanks for shopping with eRdelivery. Enjoy! 🎉`;
+                    const waLink = getWhatsAppLink(CONFIG.admin.whatsapp, message);
+                    setTimeout(() => window.open(waLink, '_blank'), 800);
+                }
 
             } catch (error) {
                 showToast('Error: ' + error.message, 'error');

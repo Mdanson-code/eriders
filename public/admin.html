@@ -197,6 +197,9 @@
                             <button onclick="sendTrackingToClient()" class="btn btn-primary w-full">
                                 📱 Send Tracking to Client
                             </button>
+                            <button onclick="sendDeliveredToClient()" class="btn btn-success w-full">
+                                ✅ Send Delivered Message to Client
+                            </button>
                             <a href="#" id="modalRiderLink" class="btn btn-secondary w-full block text-center">
                                 🚴 Open Rider Panel
                             </a>
@@ -210,9 +213,28 @@
     <script type="module">
         import { CONFIG, getSupabaseClient, showToast, getWhatsAppLink } from './js/config.js';
 
+        // Lightweight access gate
+        const urlKey = new URLSearchParams(window.location.search).get('key');
+        const storedKey = localStorage.getItem('erdelivery_admin_key');
+        if (urlKey && urlKey === CONFIG.access.adminCode) {
+            localStorage.setItem('erdelivery_admin_key', urlKey);
+        }
+        if (!localStorage.getItem('erdelivery_admin_key')) {
+            const input = prompt('Enter admin access code');
+            if (input !== CONFIG.access.adminCode) {
+                alert('Access denied');
+                window.location.href = 'index.html';
+            } else {
+                localStorage.setItem('erdelivery_admin_key', input);
+            }
+        }
+
         const supabase = getSupabaseClient();
         let allOrders = [];
         let selectedOrder = null;
+        let ordersPollInterval = null;
+        let modalOpen = false;
+        let isEditingRider = false;
 
         // Load orders on page load
         loadOrders();
@@ -242,6 +264,14 @@
                 allOrders = data;
                 updateStats();
                 filterOrders();
+
+                // If modal is open, refresh its contents with the latest order
+                if (modalOpen && selectedOrder && !isEditingRider) {
+                    const updated = allOrders.find(o => o.id === selectedOrder.id);
+                    if (updated) {
+                        openOrderModal(updated);
+                    }
+                }
 
             } catch (error) {
                 console.error('Error loading orders:', error);
@@ -328,6 +358,7 @@
 
         window.openOrderModal = function(order) {
             selectedOrder = order;
+            modalOpen = true;
             
             document.getElementById('modalOrderId').textContent = order.order_id;
             document.getElementById('modalOrderDate').textContent = new Date(order.created_at).toLocaleString();
@@ -357,6 +388,29 @@
                 document.getElementById('riderPhoneInput').value = '';
             }
 
+            // Attach edit listeners once to prevent clearing while typing
+            const nameEl = document.getElementById('riderNameInput');
+            const phoneEl = document.getElementById('riderPhoneInput');
+            if (!nameEl.dataset.bound) {
+                const onFocus = () => { isEditingRider = true; if (ordersPollInterval) { clearInterval(ordersPollInterval); ordersPollInterval = null; } };
+                const onBlur = () => {
+                    // small delay to allow switching between inputs
+                    setTimeout(() => {
+                        const active = document.activeElement;
+                        if (active !== nameEl && active !== phoneEl) {
+                            isEditingRider = false;
+                            if (!ordersPollInterval) ordersPollInterval = setInterval(loadOrders, 5000);
+                        }
+                    }, 100);
+                };
+                nameEl.addEventListener('focus', onFocus);
+                phoneEl.addEventListener('focus', onFocus);
+                nameEl.addEventListener('blur', onBlur);
+                phoneEl.addEventListener('blur', onBlur);
+                nameEl.dataset.bound = '1';
+                phoneEl.dataset.bound = '1';
+            }
+
             // Show tracking link if available
             if (order.google_maps_link || order.tracking_link) {
                 document.getElementById('trackingSection').classList.remove('hidden');
@@ -370,6 +424,7 @@
 
         window.closeModal = function() {
             document.getElementById('orderModal').classList.add('hidden');
+            modalOpen = false;
         };
 
         window.assignRider = async function() {
@@ -384,25 +439,47 @@
             }
 
             try {
+                // Disable button to prevent double submits
+                const btn = document.getElementById('assignBtn');
+                if (btn) btn.disabled = true;
+
                 // Secure update via Edge Function
-                const resp = await fetch(`${CONFIG.supabase.url}/functions/v1/update-order`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${CONFIG.supabase.anonKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        order_id: selectedOrder.id,
-                        update: {
-                            rider_name: riderName,
-                            rider_whatsapp: riderPhone,
-                            status: 'assigned'
-                        }
+                let ok = false;
+                try {
+                    const resp = await fetch(`${CONFIG.supabase.url}/functions/v1/update-order`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${CONFIG.supabase.anonKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            order_id: selectedOrder.id,
+                            update: {
+                                rider_name: riderName,
+                                rider_whatsapp: riderPhone,
+                                status: 'assigned'
+                            }
+                        })
                     })
-                })
-                if (!resp.ok) {
-                    const r = await resp.json().catch(() => ({}))
-                    throw new Error(r.error || 'Failed to assign rider')
+                    if (!resp.ok) {
+                        const r = await resp.json().catch(() => ({}));
+                        throw new Error(r.error || 'Failed to assign rider');
+                    }
+                    ok = true;
+                } catch (e) {
+                    // Fallback attempt (may be blocked by RLS in prod)
+                    try {
+                        const { error: fbError } = await supabase
+                            .from('orders')
+                            .update({ rider_name: riderName, rider_whatsapp: riderPhone, status: 'assigned' })
+                            .eq('id', selectedOrder.id);
+                        if (fbError) throw fbError;
+                        ok = true;
+                    } catch (fb) {
+                        throw e;
+                    }
+                } finally {
+                    if (btn) btn.disabled = false;
                 }
 
                 showToast('Rider assigned successfully!', 'success');
@@ -421,7 +498,8 @@
                 setTimeout(() => loadOrders(), 500);
 
             } catch (error) {
-                showToast('Error assigning rider: ' + error.message, 'error');
+                console.error(error);
+                showToast('Error assigning rider: ' + (error.message || 'Network error'), 'error');
             }
         };
 
@@ -434,21 +512,42 @@
             }
 
             try {
+                const btn = document.getElementById('transitBtn');
+                if (btn) btn.disabled = true;
+
                 // Secure update via Edge Function
-                const resp = await fetch(`${CONFIG.supabase.url}/functions/v1/update-order`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${CONFIG.supabase.anonKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        order_id: selectedOrder.id,
-                        update: { status: 'on_route' }
+                let ok = false;
+                try {
+                    const resp = await fetch(`${CONFIG.supabase.url}/functions/v1/update-order`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${CONFIG.supabase.anonKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            order_id: selectedOrder.id,
+                            update: { status: 'on_route' }
+                        })
                     })
-                })
-                if (!resp.ok) {
-                    const r = await resp.json().catch(() => ({}))
-                    throw new Error(r.error || 'Failed to update status')
+                    if (!resp.ok) {
+                        const r = await resp.json().catch(() => ({}))
+                        throw new Error(r.error || 'Failed to update status')
+                    }
+                    ok = true;
+                } catch (e) {
+                    // Fallback attempt (may be blocked by RLS)
+                    try {
+                        const { error: fbError } = await supabase
+                            .from('orders')
+                            .update({ status: 'on_route' })
+                            .eq('id', selectedOrder.id);
+                        if (fbError) throw fbError;
+                        ok = true;
+                    } catch (fb) {
+                        throw e;
+                    }
+                } finally {
+                    if (btn) btn.disabled = false;
                 }
 
                 showToast('Order marked as in transit!', 'success');
@@ -463,7 +562,8 @@
                 setTimeout(() => loadOrders(), 500);
 
             } catch (error) {
-                showToast('Error updating status: ' + error.message, 'error');
+                console.error(error);
+                showToast('Error updating status: ' + (error.message || 'Network error'), 'error');
             }
         };
 
@@ -511,7 +611,45 @@
             }
         };
 
+        window.sendDeliveredToClient = async function() {
+            if (!selectedOrder) return;
+
+            const message = `✅ Delivered\n\nHi ${selectedOrder.client_name},\nYour order ${selectedOrder.order_id} has been delivered.\nThanks for shopping with eRdelivery. Enjoy! 🎉`;
+
+            try {
+                const response = await fetch(
+                    `${CONFIG.supabase.url}/functions/v1/notify-client`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${CONFIG.supabase.anonKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            order_id: selectedOrder.id,
+                            message_type: 'delivered'
+                        })
+                    }
+                );
+
+                const result = await response.json();
+                if (result.fallback || !result.success) {
+                    const waLink = getWhatsAppLink(selectedOrder.client_whatsapp, message);
+                    window.open(waLink, '_blank');
+                } else {
+                    showToast('Delivered message sent!', 'success');
+                }
+            } catch (error) {
+                const waLink = getWhatsAppLink(selectedOrder.client_whatsapp, message);
+                window.open(waLink, '_blank');
+            }
+        };
+
         window.refreshOrders = loadOrders;
+
+        // Start polling fallback every 5s to ensure admin stays in sync if realtime hiccups
+        if (ordersPollInterval) clearInterval(ordersPollInterval);
+        ordersPollInterval = setInterval(loadOrders, 5000);
 
         // Close modal on escape
         document.addEventListener('keydown', (e) => {
