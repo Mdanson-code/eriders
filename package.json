@@ -1,0 +1,24 @@
+{
+  "name": "eriders-mvp",
+  "version": "1.0.0",
+  "description": "eRiders - Fast delivery platform with WhatsApp integration",
+  "type": "module",
+  "scripts": {
+    "dev": "npx http-server public -p 8080 -o",
+    "test:db": "node scripts/test-db-connection.js",
+    "test": "jest",
+    "test:e2e": "playwright test",
+    "load:test": "k6 run infra/k6-load-test.js"
+  },
+  "keywords": ["delivery", "whatsapp", "tracking", "logistics"],
+  "author": "eRiders Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "http-server": "^14.1.1",
+    "jest": "^29.7.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}

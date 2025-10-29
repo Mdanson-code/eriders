@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Place Order - eRdelivery</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'er-yellow': '#FADE1B',
+                        'er-lime': '#B1FA44',
+                        'er-bright': '#FAF91B',
+                        'er-orange': '#FAC31B',
+                        'er-green': '#71FA52',
+                        'er-light': '#FAF96F',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .logo-font {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-50">
+    
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-white/95 backdrop-blur-sm shadow-sm z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="index.html" class="flex items-center space-x-2 group cursor-pointer">
+                    <div class="w-10 h-10 bg-gradient-to-br from-er-yellow to-er-lime rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
+                        <svg class="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <span class="text-3xl font-black logo-font text-gray-900 tracking-tight">eRdelivery</span>
+                </a>
+                
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="track.html" class="text-gray-700 hover:text-er-lime font-bold transition-all hover:scale-110">Track Order</a>
+                    <a href="index.html" class="text-gray-700 hover:text-er-yellow font-bold transition-all hover:scale-110">Home</a>
+                </div>
+                <div class="flex items-center md:hidden">
+                    <button id="mobileMenuBtnOrder" aria-label="Open menu" class="p-2 rounded-lg border border-gray-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobileMenuOrder" class="md:hidden hidden border-t border-gray-200 bg-white">
+            <div class="px-6 py-3 space-y-2">
+                <a href="track.html" class="block text-gray-800 font-bold">Track Order</a>
+                <a href="index.html" class="block text-gray-800 font-bold">Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Order Form -->
+    <div class="container mx-auto px-4 py-8 max-w-3xl mt-24">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-3 logo-font">Place Your Order</h1>
+            <p class="text-xl text-gray-600 font-medium">Fill in the details below and we'll get it delivered fast!</p>
+        </div>
+
+        <form id="orderForm" class="space-y-6">
+            <!-- Client Information -->
+            <div class="card">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <span class="w-8 h-8 bg-gradient-to-br from-er-yellow to-er-lime text-gray-900 rounded-full flex items-center justify-center text-sm font-bold mr-3">1</span>
+                    Your Information
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Your Name *</label>
+                        <input type="text" name="client_name" required 
+                               class="input" placeholder="John Doe">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">WhatsApp Number *</label>
+                        <input type="tel" name="client_whatsapp" required 
+                               class="input" placeholder="0712345678"
+                               pattern="[0-9]{10,13}">
+                        <p class="text-xs text-gray-500 mt-1">We'll send updates here</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shop & Items -->
+            <div class="card">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <span class="w-8 h-8 bg-gradient-to-br from-er-lime to-er-green text-gray-900 rounded-full flex items-center justify-center text-sm font-bold mr-3">2</span>
+                    What do you need?
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Shop/Store (Optional)</label>
+                        <input type="text" name="preferred_shop" 
+                               class="input" placeholder="e.g., Naivas Westlands, Carrefour">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">What are you ordering? *</label>
+                        <textarea name="order_desc" required rows="4"
+                                  class="input" placeholder="E.g., 2kg rice, 1L milk, bread, eggs"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delivery Location -->
+            <div class="card">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <span class="w-8 h-8 bg-gradient-to-br from-er-green to-er-lime text-gray-900 rounded-full flex items-center justify-center text-sm font-bold mr-3">3</span>
+                    Where should we deliver?
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Delivery Address *</label>
+                        <textarea name="delivery_location_text" required rows="3"
+                                  class="input" placeholder="Full address with landmarks, e.g., Kilimani, Argwings Kodhek Road, opposite Yaya Centre"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="card bg-gradient-to-br from-er-yellow/10 to-er-lime/10 border border-er-lime/20">
+                <div class="mb-4">
+                    <h3 class="font-bold text-lg mb-2">Ready to order?</h3>
+                    <div class="bg-white p-3 rounded-lg mb-3">
+                        <p class="text-sm text-gray-700">📱 <strong>How it works:</strong></p>
+                        <ol class="text-sm text-gray-600 mt-2 ml-4 list-decimal space-y-1">
+                            <li>Submit your order details</li>
+                            <li>We'll review and send you the <strong>actual price via WhatsApp</strong></li>
+                            <li>Confirm to proceed with delivery</li>
+                        </ol>
+                    </div>
+                    <p class="text-xs text-gray-600">💰 Final cost depends on distance, items & shop location</p>
+                </div>
+                
+                <button type="submit" id="submitBtn"
+                        class="bg-gradient-to-r from-er-yellow to-er-lime text-gray-900 w-full text-lg py-4 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105">
+                    Submit Order Request →
+                </button>
+            </div>
+        </form>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-sm mx-4">
+                <div class="text-center">
+                    <div class="spinner mx-auto mb-4"></div>
+                    <h3 class="text-lg font-bold mb-2">Creating your order...</h3>
+                    <p class="text-gray-600 text-sm">Please wait</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold mb-2">Order Request Sent!</h2>
+                <p class="text-gray-600 mb-4">Your order <span id="orderNumber" class="font-bold"></span> has been created.</p>
+                
+                <div class="bg-gradient-to-br from-er-lime/10 to-er-green/10 border border-er-lime/20 p-4 rounded-lg mb-4">
+                    <p class="text-sm font-bold text-gray-800 mb-2">📱 Check your WhatsApp!</p>
+                    <p class="text-xs text-gray-600 mb-2">We've sent your order details to our team.</p>
+                    <p class="text-xs text-gray-700"><strong>Next:</strong> We'll reply with the exact delivery cost for your approval.</p>
+                </div>
+                
+                <div class="space-y-2">
+                    <a href="#" id="trackOrderBtn" class="bg-gradient-to-r from-er-yellow to-er-lime text-gray-900 px-6 py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105 inline-block w-full text-center">Track My Order</a>
+                    <button onclick="location.reload()" class="bg-gray-900 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105 w-full">Place Another Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { CONFIG, getSupabaseClient, showToast, getWhatsAppLink } from './js/config.js';
+
+        // Initialize Supabase
+        const supabase = getSupabaseClient();
+        
+        // Form elements
+        const form = document.getElementById('orderForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const successModal = document.getElementById('successModal');
+
+        // Mobile menu toggle
+        const btnOrder = document.getElementById('mobileMenuBtnOrder');
+        const menuOrder = document.getElementById('mobileMenuOrder');
+        if (btnOrder && menuOrder) {
+            btnOrder.addEventListener('click', () => menuOrder.classList.toggle('hidden'));
+        }
+
+        // Handle form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Show loading
+            loadingOverlay.classList.remove('hidden');
+            submitBtn.disabled = true;
+
+            try {
+                // Get form data
+                const formData = new FormData(form);
+                
+                // Generate order ID first
+                const { data: orderIdData } = await supabase.rpc('generate_order_id');
+                
+                if (!orderIdData) {
+                    throw new Error('Could not generate order ID');
+                }
+
+                // Prepare order data
+                const orderData = {
+                    order_id: orderIdData,
+                    client_name: formData.get('client_name'),
+                    client_whatsapp: formData.get('client_whatsapp'),
+                    preferred_shop: formData.get('preferred_shop') || null,
+                    order_desc: formData.get('order_desc'),
+                    delivery_location_text: formData.get('delivery_location_text'),
+                    // Default coordinates (Nairobi CBD)
+                    pickup_lat: -1.286389,
+                    pickup_lng: 36.817223,
+                    delivery_lat: -1.286389,
+                    delivery_lng: 36.817223,
+                    status: 'pending'
+                };
+
+                // Insert order into database
+                const { data: order, error: insertError } = await supabase
+                    .from('orders')
+                    .insert([orderData])
+                    .select()
+                    .single();
+
+                if (insertError) {
+                    throw insertError;
+                }
+
+                console.log('✅ Order created:', order);
+
+                // Try to call Edge Function to notify admin
+                try {
+                    const notifyResponse = await fetch(
+                        `${CONFIG.supabase.url}/functions/v1/notify-admin`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${CONFIG.supabase.anonKey}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ order_id: order.id })
+                        }
+                    );
+
+                    const notifyResult = await notifyResponse.json();
+                    console.log('📱 WhatsApp notification:', notifyResult);
+
+                    // If fallback, open wa.me link
+                    if (notifyResult.fallback && notifyResult.wa_link) {
+                        setTimeout(() => {
+                            window.open(notifyResult.wa_link, '_blank');
+                        }, 1000);
+                    }
+                } catch (notifyError) {
+                    console.warn('WhatsApp notification failed (will use fallback):', notifyError);
+                    // Create manual WhatsApp link
+                    const message = `Hi eRdelivery! I just placed order ${order.order_id}. Looking forward to my delivery!`;
+                    const waLink = getWhatsAppLink(CONFIG.admin.whatsapp, message);
+                    setTimeout(() => {
+                        window.open(waLink, '_blank');
+                    }, 1000);
+                }
+
+                // Hide loading
+                loadingOverlay.classList.add('hidden');
+
+                // Show success modal
+                document.getElementById('orderNumber').textContent = order.order_id;
+                document.getElementById('trackOrderBtn').href = `track.html?order=${order.order_id}`;
+                successModal.classList.remove('hidden');
+
+                showToast('Order created successfully!', 'success');
+
+            } catch (error) {
+                console.error('Error creating order:', error);
+                loadingOverlay.classList.add('hidden');
+                submitBtn.disabled = false;
+                showToast('Failed to create order: ' + error.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

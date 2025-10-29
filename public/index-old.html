@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eRiders - Fast & Reliable Delivery Service</title>
+    <meta name="description" content="Order anything, delivered fast. eRiders brings your essentials right to your door.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- AOS Animation Library -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+</head>
+<body class="bg-gray-50">
+    
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <img src="assets/logo.svg" alt="eRiders Logo" class="h-10">
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="track.html" class="text-gray-700 hover:text-blue-600 font-medium">Track Order</a>
+                    <a href="order.html" class="btn bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700">
+                        Order Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-br from-blue-600 to-blue-800 text-white py-20 overflow-hidden">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-5xl md:text-6xl font-bold mb-6 animate-fade-up">
+                    Delivery Made <span class="text-gradient">Simple</span>
+                </h1>
+                <p class="text-xl md:text-2xl mb-8 text-blue-100 animate-fade-up" style="animation-delay: 0.2s;">
+                    Order anything, delivered fast. We bring your essentials right to your door.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up" style="animation-delay: 0.4s;">
+                    <a href="#" id="whatsapp-order-btn" class="btn bg-green-500 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-green-600 flex items-center justify-center gap-2">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                        </svg>
+                        Order on WhatsApp
+                    </a>
+                    <a href="order.html" class="btn bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100">
+                        Order Online
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Animated Background Elements -->
+        <div class="absolute top-20 right-10 w-20 h-20 bg-orange-500 rounded-full opacity-20 animate-float"></div>
+        <div class="absolute bottom-20 left-10 w-32 h-32 bg-blue-300 rounded-full opacity-20 animate-float" style="animation-delay: 1s;"></div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+                <p class="text-xl text-gray-600">Three simple steps to get your delivery</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Step 1 -->
+                <div class="text-center card-hover bg-gray-50 p-8 rounded-xl" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                        1
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Place Your Order</h3>
+                    <p class="text-gray-600">Fill out the simple form or message us on WhatsApp with what you need</p>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="text-center card-hover bg-gray-50 p-8 rounded-xl" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                        2
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">We Assign a Rider</h3>
+                    <p class="text-gray-600">Our team confirms and assigns the nearest rider to your delivery</p>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="text-center card-hover bg-gray-50 p-8 rounded-xl" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                        3
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Track & Receive</h3>
+                    <p class="text-gray-600">Get a live tracking link and watch your delivery arrive</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Why Choose eRiders?</h2>
+                <p class="text-xl text-gray-600">Fast, reliable, and transparent delivery service</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Feature 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm card-hover" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-2xl mb-4 icon-bounce">
+                        🚀
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Fast Delivery</h3>
+                    <p class="text-gray-600 text-sm">Quick pickup and delivery to your location</p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm card-hover" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center text-2xl mb-4 icon-bounce">
+                        📍
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Live Tracking</h3>
+                    <p class="text-gray-600 text-sm">Track your rider in real-time on the map</p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm card-hover" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center text-2xl mb-4 icon-bounce">
+                        💬
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">WhatsApp Updates</h3>
+                    <p class="text-gray-600 text-sm">Get instant notifications on your phone</p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="bg-white p-6 rounded-xl shadow-sm card-hover" data-aos="zoom-in" data-aos-delay="400">
+                    <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center text-2xl mb-4 icon-bounce">
+                        🛡️
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Safe & Secure</h3>
+                    <p class="text-gray-600 text-sm">Your items handled with care</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center" data-aos="fade-up">
+            <h2 class="text-4xl font-bold mb-6">Ready to Get Started?</h2>
+            <p class="text-xl mb-8 text-blue-100">Experience fast, reliable delivery today</p>
+            <a href="order.html" class="btn bg-orange-500 text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-orange-600 inline-block">
+                Place Your First Order
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <img src="assets/logo.svg" alt="eRiders" class="h-10 mb-4 brightness-0 invert">
+                    <p class="text-gray-400">Fast, reliable delivery service at your fingertips</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="order.html" class="text-gray-400 hover:text-white">Order Now</a></li>
+                        <li><a href="track.html" class="text-gray-400 hover:text-white">Track Order</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Become a Rider</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Contact Us</h4>
+                    <p class="text-gray-400 mb-2">WhatsApp: +254 768 677 516</p>
+                    <p class="text-gray-400 mb-4">Email: hello@eriders.app</p>
+                    
+                    <!-- QR Code -->
+                    <div class="bg-white p-3 rounded-lg inline-block">
+                        <div class="text-xs text-gray-600 mb-1 text-center">Scan to Order</div>
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://wa.me/254768677516?text=Hi%20eRiders,%20I%20want%20to%20place%20an%20order" alt="QR Code" class="w-24 h-24">
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 eRiders. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp Button -->
+    <a href="#" id="floating-whatsapp" class="whatsapp-float">
+        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+    </a>
+
+    <!-- AOS Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+
+        // WhatsApp Integration
+        const ADMIN_WHATSAPP = '+254768677516'; // Actual admin number
+        
+        document.getElementById('whatsapp-order-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            const message = encodeURIComponent('Hi eRiders! I want to place an order.');
+            window.open(`https://wa.me/${ADMIN_WHATSAPP.replace('+', '')}?text=${message}`, '_blank');
+        });
+        
+        document.getElementById('floating-whatsapp').addEventListener('click', function(e) {
+            e.preventDefault();
+            const message = encodeURIComponent('Hi eRiders! I have a question.');
+            window.open(`https://wa.me/${ADMIN_WHATSAPP.replace('+', '')}?text=${message}`, '_blank');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Tracking - eRiders</title>
+    
+    <!-- Open Graph for WhatsApp Preview -->
+    <meta property="og:title" content="🚴 eRiders Live Tracking">
+    <meta property="og:description" content="Track your delivery in real-time">
+    <meta property="og:image" content="https://eriders.app/assets/logo.svg">
+    <meta property="og:type" content="website">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'er-yellow': '#FADE1B',
+                        'er-lime': '#B1FA44',
+                        'er-bright': '#FAF91B',
+                        'er-orange': '#FAC31B',
+                        'er-green': '#71FA52',
+                        'er-light': '#FAF96F',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .logo-font {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
+    
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        #map {
+            width: 100%;
+            height: 500px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    
+    <nav class="bg-gradient-to-r from-er-yellow to-er-lime shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 text-er-yellow" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-black logo-font text-gray-900">eRiders</span>
+                    <span class="ml-3 text-sm font-bold text-gray-900">Live Tracking</span>
+                </div>
+                <div class="text-sm">
+                    <span class="animate-pulse font-bold text-gray-900">● LIVE</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        
+        <!-- Header -->
+        <div class="card mb-6 bg-gradient-to-br from-er-yellow/10 to-er-lime/10 border border-er-lime/20">
+            <div class="text-center">
+                <h1 class="text-3xl font-black text-gray-900 mb-2 logo-font">📍 Live Delivery Tracking</h1>
+                <p class="text-gray-700 font-medium" id="orderInfo">Loading order information...</p>
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div class="card mb-6">
+            <div id="map" class="bg-gray-200 flex items-center justify-center">
+                <div class="text-center">
+                    <div class="spinner mx-auto mb-4"></div>
+                    <p class="text-gray-600">Loading map...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rider Info -->
+        <div class="card bg-gradient-to-br from-er-lime/10 to-er-green/10 border border-er-lime/20">
+            <h3 class="font-bold text-lg mb-4 flex items-center">
+                <span class="text-2xl mr-2">🚴</span> Your Rider
+            </h3>
+            <div id="riderInfo" class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Name:</span>
+                    <span class="font-bold" id="riderName">Loading...</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Contact:</span>
+                    <a href="#" id="riderPhone" class="font-bold text-blue-600">Loading...</a>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Status:</span>
+                    <span class="badge badge-on_route" id="statusBadge">ON THE WAY</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-2 gap-4 mt-6">
+            <button onclick="refreshLocation()" class="btn btn-secondary">
+                🔄 Refresh Location
+            </button>
+            <button onclick="openInGoogleMaps()" class="btn btn-primary">
+                🗺️ Open in Google Maps
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-gray-500 text-sm">
+            <p>Powered by eRiders 🚴 | Fast, Reliable Delivery</p>
+            <p class="mt-2">Questions? WhatsApp us: <a href="https://wa.me/254768677516" class="text-blue-600 font-medium">+254 768 677 516</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Get parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const lat = parseFloat(urlParams.get('lat'));
+        const lng = parseFloat(urlParams.get('lng'));
+        const orderId = urlParams.get('order');
+        const riderName = urlParams.get('rider') || 'Your Rider';
+        const riderPhone = urlParams.get('phone') || '+254768677516';
+
+        // Update page info
+        document.getElementById('orderInfo').textContent = `Order: ${orderId || 'Unknown'}`;
+        document.getElementById('riderName').textContent = riderName;
+        document.getElementById('riderPhone').textContent = riderPhone;
+        document.getElementById('riderPhone').href = `tel:${riderPhone}`;
+
+        // Initialize map
+        function initMap() {
+            if (!lat || !lng) {
+                document.getElementById('map').innerHTML = `
+                    <div class="text-center p-8">
+                        <p class="text-red-600 font-bold mb-2">❌ No GPS location available</p>
+                        <p class="text-gray-600 text-sm">The rider hasn't shared their location yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Create Google Maps iframe
+            const mapUrl = `https://maps.google.com/maps?q=${lat},${lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+            
+            document.getElementById('map').innerHTML = `
+                <iframe
+                    width="100%"
+                    height="100%"
+                    frameborder="0"
+                    scrolling="no"
+                    marginheight="0"
+                    marginwidth="0"
+                    src="${mapUrl}"
+                    style="border-radius: 12px;">
+                </iframe>
+            `;
+        }
+
+        window.openInGoogleMaps = function() {
+            if (lat && lng) {
+                window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+            }
+        };
+
+        window.refreshLocation = function() {
+            location.reload();
+        };
+
+        // Initialize on load
+        initMap();
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>

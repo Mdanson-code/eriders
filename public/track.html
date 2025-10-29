@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Order - eRdelivery</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'er-yellow': '#FADE1B',
+                        'er-lime': '#B1FA44',
+                        'er-bright': '#FAF91B',
+                        'er-orange': '#FAC31B',
+                        'er-green': '#71FA52',
+                        'er-light': '#FAF96F',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .logo-font {
+            font-family: 'Outfit', sans-serif;
+        }
+    </style>
+    
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-50">
+    
+    <nav class="fixed w-full bg-white/95 backdrop-blur-sm shadow-sm z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="index.html" class="flex items-center space-x-2 group cursor-pointer">
+                    <div class="w-10 h-10 bg-gradient-to-br from-er-yellow to-er-lime rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
+                        <svg class="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <span class="text-3xl font-black logo-font text-gray-900 tracking-tight">eRdelivery</span>
+                </a>
+                
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="order.html" class="bg-gradient-to-r from-er-yellow to-er-lime text-gray-900 px-6 py-2 rounded-full font-bold shadow-md hover:shadow-lg transition-all hover:scale-105">New Order</a>
+                </div>
+                <div class="flex items-center md:hidden">
+                    <button id="mobileMenuBtnTrack" aria-label="Open menu" class="p-2 rounded-lg border border-gray-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobileMenuTrack" class="md:hidden hidden border-t border-gray-200 bg-white">
+            <div class="px-6 py-3 space-y-2">
+                <a href="order.html" class="block text-gray-800 font-bold">New Order</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl mt-24">
+        <!-- Search Form -->
+        <div id="searchForm" class="card mb-8">
+            <h1 class="text-3xl md:text-4xl font-black mb-4 logo-font">Track Your Order</h1>
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <input type="text" id="orderIdInput" placeholder="Enter Order ID (e.g., ER-2025-001)" 
+                       class="input w-full sm:flex-1">
+                <button onclick="trackOrder()" class="bg-gradient-to-r from-er-yellow to-er-lime text-gray-900 px-8 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105 w-full sm:w-auto">Track</button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden text-center py-12">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading order details...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="hidden card bg-red-50">
+            <div class="text-center py-8">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold text-red-900 mb-2">Order Not Found</h2>
+                <p class="text-red-700" id="errorMessage"></p>
+            </div>
+        </div>
+
+        <!-- Order Details -->
+        <div id="orderDetails" class="hidden space-y-6">
+            <!-- Status Timeline -->
+            <div class="card">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold">Order <span id="displayOrderId"></span></h2>
+                        <p class="text-gray-600 text-sm" id="orderDate"></p>
+                    </div>
+                    <span id="statusBadge" class="badge"></span>
+                </div>
+
+                <div class="relative" id="statusTimeline">
+                    <!-- Timeline will be populated by JS -->
+                </div>
+            </div>
+
+            <!-- Rider Info (if assigned) -->
+            <div id="riderInfo" class="hidden card bg-gradient-to-br from-er-lime/10 to-er-green/10 border border-er-lime/20">
+                <h3 class="font-bold text-lg mb-4">🚴 Your Rider</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Name</p>
+                        <p class="font-medium" id="riderName"></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Contact</p>
+                        <p class="font-medium" id="riderPhone"></p>
+                    </div>
+                </div>
+                <a href="#" id="callRiderBtn" class="bg-gradient-to-r from-er-yellow to-er-lime text-gray-900 px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105 w-full mt-4 inline-block text-center">
+                    📞 Call Rider
+                </a>
+            </div>
+
+            <!-- Location Details -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3 class="font-bold mb-3 flex items-center">
+                        <span class="text-blue-600 mr-2">📍</span> Pickup
+                    </h3>
+                    <p class="text-gray-700 text-sm" id="pickupAddress"></p>
+                </div>
+
+                <div class="card">
+                    <h3 class="font-bold mb-3 flex items-center">
+                        <span class="text-green-600 mr-2">📍</span> Delivery
+                    </h3>
+                    <p class="text-gray-700 text-sm mb-2" id="deliveryAddress"></p>
+                    <p class="text-gray-600 text-sm">
+                        <span id="deliveryContact"></span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Package Details -->
+            <div class="card">
+                <h3 class="font-bold mb-3">📦 Package Details</h3>
+                <div class="space-y-2 text-sm">
+                    <p><span class="text-gray-600">Shop:</span> <span id="shopName" class="font-medium"></span></p>
+                    <p><span class="text-gray-600">Items:</span> <span id="orderItems" class="font-medium"></span></p>
+                </div>
+            </div>
+
+            <!-- Live Tracking Link -->
+            <div id="trackingLinkSection" class="hidden card bg-gradient-to-br from-er-green/10 to-er-lime/10 border border-er-green/20">
+                <h3 class="font-bold mb-3">🗺️ Live Tracking</h3>
+                <p class="text-sm text-gray-700 mb-4">Your rider is on the way! Click below to see live location.</p>
+                <a href="#" id="liveTrackingLink" target="_blank" class="bg-gradient-to-r from-er-lime to-er-green text-gray-900 px-6 py-3 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105 w-full inline-block text-center">
+                    Open Live Map →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { CONFIG, getSupabaseClient, showToast } from './js/config.js';
+
+        const supabase = getSupabaseClient();
+        let orderSubscription = null;
+        let pollInterval = null;
+
+        // Get order ID from URL or input
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderIdFromUrl = urlParams.get('order');
+        
+        if (orderIdFromUrl) {
+            document.getElementById('orderIdInput').value = orderIdFromUrl;
+            trackOrder();
+        }
+
+        // Mobile menu toggle
+        const btnTrack = document.getElementById('mobileMenuBtnTrack');
+        const menuTrack = document.getElementById('mobileMenuTrack');
+        if (btnTrack && menuTrack) {
+            btnTrack.addEventListener('click', () => menuTrack.classList.toggle('hidden'));
+        }
+
+        window.trackOrder = async function() {
+            const orderId = document.getElementById('orderIdInput').value.trim();
+            
+            if (!orderId) {
+                showToast('Please enter an order ID', 'error');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('searchForm').classList.add('hidden');
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+            document.getElementById('orderDetails').classList.add('hidden');
+
+            try {
+                // Fetch order from database
+                const { data: order, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .eq('order_id', orderId)
+                    .single();
+
+                if (error || !order) {
+                    throw new Error('Order not found');
+                }
+
+                // Display order
+                displayOrder(order);
+
+                // Subscribe to real-time updates and start polling fallback
+                subscribeToOrderUpdates(order.id);
+                startPollingFallback(order.id);
+
+                // Hide loading, show order
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('orderDetails').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error fetching order:', error);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('errorState').classList.remove('hidden');
+                document.getElementById('errorMessage').textContent = error.message;
+            }
+        };
+
+        function displayOrder(order) {
+            // Basic info
+            document.getElementById('displayOrderId').textContent = order.order_id;
+            document.getElementById('orderDate').textContent = new Date(order.created_at).toLocaleString();
+            
+            // Status badge
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.textContent = order.status.replace('_', ' ').toUpperCase();
+            statusBadge.className = `badge badge-${order.status}`;
+
+            // Timeline
+            renderTimeline(order);
+
+            // Locations
+            document.getElementById('pickupAddress').textContent = 
+                order.preferred_shop || 'Pickup location to be confirmed';
+            document.getElementById('deliveryAddress').textContent = order.delivery_location_text;
+            document.getElementById('deliveryContact').textContent = 
+                `Contact: ${order.client_name} - ${order.client_whatsapp}`;
+
+            // Package
+            document.getElementById('shopName').textContent = order.preferred_shop || 'Not specified';
+            document.getElementById('orderItems').textContent = order.order_desc;
+
+            // Rider info (if assigned)
+            if (order.rider_name) {
+                document.getElementById('riderInfo').classList.remove('hidden');
+                document.getElementById('riderName').textContent = order.rider_name;
+                document.getElementById('riderPhone').textContent = order.rider_whatsapp || 'N/A';
+                document.getElementById('callRiderBtn').href = `tel:${order.rider_whatsapp}`;
+            }
+
+            // Tracking link (if available)
+            if (order.tracking_link || order.google_maps_link) {
+                document.getElementById('trackingLinkSection').classList.remove('hidden');
+                document.getElementById('liveTrackingLink').href = 
+                    order.tracking_link || order.google_maps_link;
+            }
+        }
+
+        function renderTimeline(order) {
+            const timeline = document.getElementById('statusTimeline');
+            const statuses = [
+                { key: 'pending', label: 'Order Placed', icon: '📝' },
+                { key: 'assigned', label: 'Rider Assigned', icon: '✅' },
+                { key: 'on_route', label: 'On the Way', icon: '🚴' },
+                { key: 'delivered', label: 'Delivered', icon: '🎉' }
+            ];
+
+            const currentStatusIndex = statuses.findIndex(s => s.key === order.status);
+
+            timeline.innerHTML = statuses.map((status, index) => {
+                const isCompleted = index <= currentStatusIndex;
+                const isCurrent = index === currentStatusIndex;
+                
+                return `
+                    <div class="flex items-start pb-8 last:pb-0">
+                        <div class="flex flex-col items-center mr-4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-xl
+                                ${isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}">
+                                ${status.icon}
+                            </div>
+                            ${index < statuses.length - 1 ? 
+                                `<div class="w-0.5 h-full ${isCompleted ? 'bg-green-500' : 'bg-gray-200'} mt-2"></div>` 
+                                : ''}
+                        </div>
+                        <div class="flex-1 pt-2">
+                            <p class="font-bold ${isCurrent ? 'text-green-600' : ''}">
+                                ${status.label}
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                ${isCompleted ? new Date(order.created_at).toLocaleString() : 'Pending'}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function subscribeToOrderUpdates(orderId) {
+            // Unsubscribe from previous
+            if (orderSubscription) {
+                orderSubscription.unsubscribe();
+            }
+
+            // Subscribe to real-time changes
+            orderSubscription = supabase
+                .channel('order-changes')
+                .on('postgres_changes', 
+                    { 
+                        event: 'UPDATE', 
+                        schema: 'public', 
+                        table: 'orders',
+                        filter: `id=eq.${orderId}`
+                    }, 
+                    (payload) => {
+                        console.log('Order updated:', payload.new);
+                        displayOrder(payload.new);
+                        showToast('Order status updated!', 'success');
+                    }
+                )
+                .subscribe();
+        }
+
+        function startPollingFallback(orderId) {
+            if (pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(async () => {
+                try {
+                    const { data: latest, error } = await supabase
+                        .from('orders')
+                        .select('*')
+                        .eq('id', orderId)
+                        .single();
+                    if (!error && latest) {
+                        displayOrder(latest);
+                        // Stop polling after delivered
+                        if (latest.status === 'delivered') {
+                            clearInterval(pollInterval);
+                            pollInterval = null;
+                        }
+                    }
+                } catch {}
+            }, 5000);
+        }
+
+        // Update URL when searching
+        const originalTrackOrder = window.trackOrder;
+        window.trackOrder = function() {
+            const orderId = document.getElementById('orderIdInput').value.trim();
+            if (orderId) {
+                history.pushState({}, '', `?order=${orderId}`);
+            }
+            originalTrackOrder();
+        };
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (orderSubscription) {
+                orderSubscription.unsubscribe();
+            }
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+        });
+    </script>
+</body>
+</html>
